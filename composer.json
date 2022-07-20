@@ -1,0 +1,14 @@
+{
+    "name": "xzeromcpe/docker-php",
+    "description": "A PHP wrapper for the docker CLI",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "xZeroMCPE\\Docker\\": "src/xZeroMCPE/Docker"
+        }
+    }
+}
