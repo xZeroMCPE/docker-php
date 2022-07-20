@@ -1,6 +1,7 @@
 {
     "name": "xzeromcpe/docker-php",
     "description": "A PHP wrapper for the docker CLI",
+    "version": "1.0.0",
     "type": "library",
     "license": "MIT",
     "require": {

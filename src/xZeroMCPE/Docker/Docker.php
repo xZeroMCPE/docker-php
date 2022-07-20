@@ -13,7 +13,7 @@ class Docker
      */
     private function outputContains($output, $string)
     {
-        if(is_array($output, $string)) {
+        if(is_array($output)) {
             foreach ($output as $line) {
                 if (strpos($line, $string) !== false) {
                     return true;
@@ -259,6 +259,16 @@ class Docker
         }
 
         return false;
+    }
+
+    public function pull($image) {
+        $output = $this->executeCommand(array_merge(
+            [
+              "pull",
+                $image
+            ], []
+        ));
+        return $this->outputContains($output, "Pull complete");
     }
 
     /**
