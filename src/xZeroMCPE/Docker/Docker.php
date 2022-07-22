@@ -35,14 +35,18 @@ class Docker
      * @param array|string $args
      * @return array
      */
-    public function executeCommand($args = [])
+    public function executeCommand(array$args = [])
     {
+
         // we needs the "args" argument to be an array
         if (!is_array($args)) {
             $args = [ $args ];
         }
+        $args = implode(' ', $args);
+
+
         $outputBuffer = [];
-        exec('docker ' . implode(' ', $args), $outputBuffer);
+        exec('docker ' . $args, $outputBuffer);
         return $outputBuffer;
     }
 
@@ -52,7 +56,7 @@ class Docker
      * @param bool $all
      * @return Container[]
      */
-    public function ps($all = false)
+    public function ps(bool$all = false)
     {
         $fieldMap = [
             'id' => '{{.ID}}',
@@ -107,7 +111,7 @@ class Docker
      * @param $name
      * @return bool
      */
-    public function isContainerRunning($name)
+    public function isContainerRunning(string $name)
     {
         foreach($this->ps() as $container) {
             if (in_array($name, $container->getNames())) {
@@ -123,7 +127,7 @@ class Docker
      * @param $name
      * @return bool
      */
-    public function isContainerExisting($name)
+    public function isContainerExisting(string $name)
     {
         foreach($this->ps(true) as $container) {
             if (in_array($name, $container->getNames())) {
@@ -139,7 +143,7 @@ class Docker
      * @param $name
      * @return null|Container
      */
-    public function getContainerInfo($name)
+    public function getContainerInfo(string $name)
     {
         foreach($this->ps(true) as $container) {
             if (in_array($name, $container->getNames())) {
@@ -157,14 +161,14 @@ class Docker
      * @param $name
      * @return bool
      */
-    public function start($name)
+    public function start(string $name)
     {
         if (!$this->isContainerRunning($name)) {
             $output = $this->executeCommand([
                 'start',
                 $name
             ]);
-            return $output[0] === $name;
+            return $output[0] ?? [] === $name;
         }
 
         return true;
@@ -177,7 +181,7 @@ class Docker
      * @param $name
      * @return bool
      */
-    public function stop($name)
+    public function stop(string $name)
     {
         if ($this->isContainerRunning($name)) {
             $output = $this->executeCommand([
@@ -197,7 +201,7 @@ class Docker
      * @param $name
      * @return bool
      */
-    public function kill($name)
+    public function kill(string $name)
     {
         if ($this->isContainerRunning($name)) {
             $this->executeCommand([
@@ -218,7 +222,7 @@ class Docker
      * @param bool $killIfRunning
      * @return bool
      */
-    public function remove($name, $killIfRunning = true)
+    public function remove(string$name, bool $killIfRunning = true)
     {
         if ($this->isContainerExisting($name)) {
 
@@ -245,39 +249,46 @@ class Docker
      * @param array $args
      * @return bool
      */
-    public function run($name, $args = [])
+    public function run(string $name, array $args = [])
     {
         if (!$this->isContainerExisting($name)) {
-            $this->executeCommand(array_merge(
-                [
-                    'run',
-                    '--name '.$name,
-                ],
-                $args
-            ));
+
+
+            $this->executeCommand(
+                array_merge(
+                    [
+                        "run",
+                    ],
+                    $args)
+            );
             return $this->isContainerRunning($name);
         }
 
         return false;
     }
 
-    public function pull($image) {
+
+    public function pull(string $image) {
         $output = $this->executeCommand(array_merge(
             [
-              "pull",
+                "pull",
                 $image
             ], []
         ));
         return $this->outputContains($output, "Pull complete");
     }
 
+
+    public function getLog(string $name) : array {
+        return $this->executeCommand(["logs $name"]);
+    }
     /**
      * Checks if docker is installed correctly or not
      * (needs to be available over PATH)
      *
      * @return bool
      */
-    public function isInstalled()
+    public function isInstalled() : bool
     {
         return $this->outputContains(
             $this->executeCommand('--version'),
